@@ -1,55 +1,38 @@
 package net.md_5.bungee.config;
 
 import com.google.common.base.Charsets;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.representer.Represent;
-import org.yaml.snakeyaml.representer.Representer;
 
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
-public class YamlConfiguration extends ConfigurationProvider
+public class JsonConfiguration extends ConfigurationProvider
 {
 
-    private final ThreadLocal<Yaml> yaml = new ThreadLocal<Yaml>()
+    private final Gson json = new GsonBuilder().serializeNulls().setPrettyPrinting().registerTypeAdapter( Configuration.class, new JsonSerializer<Configuration>()
     {
         @Override
-        protected Yaml initialValue()
+        public JsonElement serialize(Configuration src, Type typeOfSrc, JsonSerializationContext context)
         {
-            DumperOptions options = new DumperOptions();
-            options.setDefaultFlowStyle( DumperOptions.FlowStyle.BLOCK );
-
-            Representer representer = new Representer( options )
-            {
-                {
-                    representers.put( Configuration.class, new Represent()
-                    {
-                        @Override
-                        public Node representData(Object data)
-                        {
-                            return represent( ( (Configuration) data ).self );
-                        }
-                    } );
-                }
-            };
-
-            return new Yaml( new Constructor( new LoaderOptions() ), representer, options );
+            return context.serialize( ( (Configuration) src ).self );
         }
-    };
+    } ).create();
 
     @Override
     public void save(Configuration config, File file) throws IOException
@@ -63,7 +46,7 @@ public class YamlConfiguration extends ConfigurationProvider
     @Override
     public void save(Configuration config, Writer writer)
     {
-        yaml.get().dump( config.self, writer );
+        json.toJson( config.self, writer );
     }
 
     @Override
@@ -91,7 +74,7 @@ public class YamlConfiguration extends ConfigurationProvider
     @SuppressWarnings("unchecked")
     public Configuration load(Reader reader, Configuration defaults)
     {
-        Map<String, Object> map = yaml.get().loadAs( reader, LinkedHashMap.class );
+        Map<String, Object> map = json.fromJson( reader, LinkedHashMap.class );
         if ( map == null )
         {
             map = new LinkedHashMap<>();
@@ -106,15 +89,9 @@ public class YamlConfiguration extends ConfigurationProvider
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Configuration load(InputStream is, Configuration defaults)
     {
-        Map<String, Object> map = yaml.get().loadAs( is, LinkedHashMap.class );
-        if ( map == null )
-        {
-            map = new LinkedHashMap<>();
-        }
-        return new Configuration( map, defaults );
+        return load( new InputStreamReader( is, Charsets.UTF_8 ), defaults );
     }
 
     @Override
@@ -127,7 +104,7 @@ public class YamlConfiguration extends ConfigurationProvider
     @SuppressWarnings("unchecked")
     public Configuration load(String string, Configuration defaults)
     {
-        Map<String, Object> map = yaml.get().loadAs( string, LinkedHashMap.class );
+        Map<String, Object> map = json.fromJson( string, LinkedHashMap.class );
         if ( map == null )
         {
             map = new LinkedHashMap<>();
