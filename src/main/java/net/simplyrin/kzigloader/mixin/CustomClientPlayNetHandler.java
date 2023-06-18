@@ -1,7 +1,7 @@
 package net.simplyrin.kzigloader.mixin;
 
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.network.packet.s2c.play.GameMessageS2CPacket;
 import net.simplyrin.kzigloader.Main;
@@ -19,7 +19,7 @@ public class CustomClientPlayNetHandler {
         Main.getInstance().getTps().onChat(message, info);
     }
 
-    @Inject(method = "sendPacket", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "sendPacket(Lnet/minecraft/network/packet/Packet;)V", at = @At("HEAD"), cancellable = true)
     public void sendPacket(Packet<?> packet, CallbackInfo info) {
         if (packet instanceof CustomPayloadC2SPacket) {
             var payload = (CustomPayloadC2SPacket) packet;

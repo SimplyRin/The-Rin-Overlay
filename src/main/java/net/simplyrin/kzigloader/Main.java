@@ -3,6 +3,7 @@ package net.simplyrin.kzigloader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -10,8 +11,15 @@ import lombok.Getter;
 import net.fabricmc.api.ModInitializer;
 import net.md_5.bungee.config.Configuration;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.texture.StatusEffectSpriteManager;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.MutableText;
@@ -60,13 +68,14 @@ public class Main implements ModInitializer {
 	private static Main instance;
 
 	@Getter
-	private static final String version = "0.7.1-SNAPSHOT";
+	private static final String version = "1.0-SNAPSHOT";
 
 	private String prefix = "&7[&cTheRinOverlay&7] &r";
 
 	private boolean toggle = true;
 	private boolean toggleItemBreak = true;
 	private boolean showIpAddress = true;
+	private boolean playerEntity = true;
 
 	private boolean debug = false;
 	private boolean servertps = true;
@@ -128,6 +137,7 @@ public class Main implements ModInitializer {
 
 			config.set("toggle-ib", true);
 			config.set("toggle-ip", true);
+			config.set("toggle-playerentity", true);
 			config.set("server-tps", true);
 
 			Config.saveConfig(config, data);
@@ -138,6 +148,7 @@ public class Main implements ModInitializer {
 
 		this.toggleItemBreak = this.data.getBoolean("toggle-ib");
 		this.showIpAddress = this.data.getBoolean("toggle-ip");
+		this.playerEntity = this.data.getBoolean("toggle-playerentity", true);
 		this.servertps = this.data.getBoolean("server-tps");
 
 		this.overlay = new Overlay(this);
@@ -148,8 +159,23 @@ public class Main implements ModInitializer {
 		this.list = this.config.getStringList("List");
 	}
 
-	public void onRenderGameOverlay(MatrixStack matrix) {
-		this.matrixStack = matrix;
+	public void drawPlayerEntity() {
+		if (!this.playerEntity) {
+			return;
+		}
+
+		MinecraftClient mc = MinecraftClient.getInstance();
+
+		try {
+			InventoryScreen.drawEntity(this.drawContext, 200, 100, 30,-15, -15, mc.player);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void onRenderGameOverlay(DrawContext matrix) {
+		this.drawContext = matrix;
+		this.matrixStack = matrix.getMatrices();
 
 		if (MinecraftClient.getInstance().player == null) {
 			return;
@@ -165,6 +191,8 @@ public class Main implements ModInitializer {
 			return;
 		}
 
+		this.drawPlayerEntity();
+
 		this.drawString("&6The Rin Overlay v" + Main.version, 4, 4);
 
 		int i = 16;
@@ -176,18 +204,27 @@ public class Main implements ModInitializer {
 			i += 10;
 		}
 
-		List<String> potions = this.overlay.getPotions();
-		if (potions.size() > 0) {
-			int baseHeight = mc.getWindow().getScaledHeight() / 2;
+		Collection<StatusEffectInstance> effects = mc.player.getStatusEffects();
+		if (effects.size() > 0) {
+			int baseHeight = (mc.getWindow().getScaledHeight() / 2) - ((effects.size() * 10) / 2) - 6;
 
 			this.drawString("&nActive Potion Effects", 4, baseHeight, 16755200);
 			baseHeight += 12;
 
-			for (String potion : potions) {
-				// TODO: draw Potion Icon
-				// this.potionEffectRenderer.drawActivePotionEffects();
+			StatusEffectSpriteManager statusEffectSpriteManager = mc.getStatusEffectSpriteManager();
 
-				this.drawString("&f" + potion, 4, baseHeight, 16755200);
+			for (StatusEffectInstance effect : effects) {
+				StatusEffect statusEffect = effect.getEffectType();
+				Sprite sprite = statusEffectSpriteManager.getSprite(statusEffect);
+
+				String value = this.overlay.convertMinecraftId(effect.getTranslationKey()) + " " + effect.getAmplifier() + " - "
+						+ this.overlay.convertDuration(effect);
+
+				if (sprite != null) {
+					matrix.drawSprite(4, baseHeight - 1, 0, 10, 10, sprite);
+				}
+				this.drawString("&f" + value, 18, baseHeight, 16755200);
+
 				baseHeight += 10;
 			}
 		}
@@ -222,7 +259,7 @@ public class Main implements ModInitializer {
 			String color = "&f";
 			int count = 0;
 
-			if (currentItem != null && currentItem.getItem().getTranslationKey().equals("item.minecraft.bow")) {
+			if (currentItem.getItem().getTranslationKey().equals("item.minecraft.bow")) {
 				for (ItemStack item : items) {
 					String translationKey = item.getItem().getTranslationKey();
 					if (translationKey.equals("item.minecraft.arrow")
@@ -255,29 +292,37 @@ public class Main implements ModInitializer {
 		Iterable<ItemStack> iterable = mc.player.getArmorItems();
 		ArrayList<ItemStack> list = new ArrayList<>();
 		for (ItemStack itemStack : iterable) {
+			if (itemStack.getTranslationKey().equalsIgnoreCase("Block.minecraft.air")) {
+				continue;
+			}
+
 			list.add(itemStack);
 		}
 		Collections.reverse(list);
 
-		String armorHud = "Armor Hud";
-
-		if (potions.size() > 0) {
+		// ポーション効果がある場合、右上にスプライトが表示され被るため少し下にずらす
+		if (effects.size() > 0) {
 			i += 50;
 		}
 
-		this.drawString("&n&n" + armorHud, width - (mc.textRenderer.getWidth(armorHud) + 4), i, 16755200);
-		i += 12;
+		if (currentItem != null && currentItem.isDamageable()) {
+			list.add(0, currentItem);
+		}
+
+		if (list.size() > 0) {
+			String armorHud = "Armor Hud";
+			this.drawString("&n&n" + armorHud, width - (mc.textRenderer.getWidth(armorHud) + 4), i, 16755200);
+			i += 12;
+		}
 
 		if (currentItem != null) {
-			list.add(0, currentItem);
-
 			if (this.toggleItemBreak) {
 				double damage = (((currentItem.getMaxDamage() - currentItem.getDamage()) * 1.0) / currentItem.getMaxDamage()) * 100;
 				if (damage <= 2.0) {
 					if (mc.player.getInventory().selectedSlot == 8) {
-						mc.player.getInventory().selectedSlot = 5;
+						mc.player.getInventory().selectedSlot = 0;
 					} else {
-						mc.player.getInventory().selectedSlot = 8;
+						mc.player.getInventory().selectedSlot += 1;
 					}
 					this.info("&a&lアイテム破壊防止の為、スロットが変更されました。");
 				}
@@ -287,11 +332,7 @@ public class Main implements ModInitializer {
 		for (ItemStack itemStack : list) {
 			String key = itemStack.getTranslationKey();
 
-			if (key.equals("Block.minecraft.air")) {
-				continue;
-			}
-
-			String name = this.overlay.convertMinecraftId(itemStack.getTranslationKey());
+			String name = this.overlay.convertMinecraftId(key);
 
 			double damage = (((itemStack.getMaxDamage() - itemStack.getDamage()) * 1.0) / itemStack.getMaxDamage()) * 100;
 
@@ -321,7 +362,9 @@ public class Main implements ModInitializer {
 			i += 10;
 		}
 
-		i += 10;
+		if (!list.isEmpty()) {
+			i += 10;
+		}
 
 		Tps tps = this.tps;
 		if (tps.getTpsList().size() > 0 && this.servertps) {
@@ -329,7 +372,7 @@ public class Main implements ModInitializer {
 			this.drawString("&n&n" + tpsHud, width - (mc.textRenderer.getWidth(tpsHud) + 4), i, 16755200);
 			i += 12;
 
-			String lastUpdate = "L U";
+			String lastUpdate = "LU";
 
 			int l = mc.textRenderer.getWidth(lastUpdate);
 			int ll = mc.textRenderer.getWidth(tps.getLastUpdated());
@@ -380,10 +423,14 @@ public class Main implements ModInitializer {
 		this.drawString(text, x, y, 0);
 	}
 
+	private DrawContext drawContext;
 	private MatrixStack matrixStack;
 
 	public void drawString(String text, int x, int y, int color) {
-		MinecraftClient.getInstance().textRenderer.drawWithShadow(this.matrixStack, ChatColor.translateAlternateColorCodes(text), x, y, color);
+		text = ChatColor.translateAlternateColorCodes(text);
+
+		TextRenderer tr = MinecraftClient.getInstance().textRenderer;
+		this.drawContext.drawTextWithShadow(tr, text, x, y, color);
 	}
 
 	public boolean toggle() {
@@ -408,6 +455,15 @@ public class Main implements ModInitializer {
 		this.saveDataConfig();
 
 		return this.showIpAddress;
+	}
+
+	public boolean togglePlayerEntity() {
+		this.playerEntity = !this.playerEntity;
+
+		this.data.set("toggle-playerentity", this.playerEntity);
+		this.saveDataConfig();
+
+		return this.playerEntity;
 	}
 
 	public boolean debug() {

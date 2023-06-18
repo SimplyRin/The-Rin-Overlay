@@ -74,6 +74,12 @@ public class ClientCommandHandler {
 						return;
 					}
 
+					if (args[1].equalsIgnoreCase("toggle-playerentity") || args[1].equalsIgnoreCase("toggle-pe")) {
+						boolean toggle = this.instance.togglePlayerEntity();
+						this.info("&bプレイヤーエンティティー表示&7: " + (toggle ? "&a有効" : "&c無効") + "&b");
+						return;
+					}
+
 					if (args[1].equalsIgnoreCase("armor")) {
 						Iterable<ItemStack> iterable = mc.player.getArmorItems();
 						ArrayList<ItemStack> list = new ArrayList<>();
@@ -139,6 +145,7 @@ public class ClientCommandHandler {
 		this.info("&e" + label + " toggle &7: &bオーバーレイの表示/非表示切り替え");
 		this.info("&e" + label + " toggle-ib &7: &bアイテム破壊防止オン/オフの切り替え");
 		this.info("&e" + label + " toggle-ip &7: &bオーバーレイへの IP 表示オン/オフの切り替え");
+		this.info("&e" + label + " toggle-pe &7: &bプレイヤーエンティティ 表示オン/オフの切り替え");
 		this.info("&e" + label + " server-tps &7: &bSpigotサーバー上での TPS を画面上に表示します(要OP)");
 		this.info("&e" + label + " license &7: &bオープンソースライセンスの表示");
 		this.info("&m------------------------------------");

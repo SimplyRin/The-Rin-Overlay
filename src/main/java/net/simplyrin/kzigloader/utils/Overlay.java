@@ -12,10 +12,7 @@ import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
 import net.simplyrin.kzigloader.Main;
-
-import static net.simplyrin.kzigloader.utils.Overlay.Type.WORLD_TIME;
 
 public class Overlay {
 

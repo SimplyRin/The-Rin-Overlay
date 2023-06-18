@@ -58,7 +58,7 @@ public class Tps {
 			while (true) {
 				MinecraftClient mc = MinecraftClient.getInstance();
 				if (mc.player != null && this.instance.isServertps()) {
-					mc.player.sendCommand("tps");
+					mc.player.networkHandler.sendChatCommand("tps");
 				}
 
 				try {
