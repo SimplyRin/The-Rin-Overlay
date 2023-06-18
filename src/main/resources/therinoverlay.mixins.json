@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.simplyrin.kzigloader.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+  ],
+  "client": [
+    "CustomInGameHud",
+    "CustomClientPlayerEntiry",
+    "CustomClientPlayNetHandler",
+    "CustomLivingRenderer"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

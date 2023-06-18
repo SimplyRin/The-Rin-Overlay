@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "therinoverlay",
+  "version": "${version}",
+
+  "name": "TheRinOverlay",
+  "description": "This is an example description! Tell everyone what your mod is about!",
+  "authors": [
+    "SimplyRin"
+  ],
+  "contact": {
+    "homepage": "https://github.com/SimplyRin",
+    "sources": "https://github.com/SimplyRin/The-Rin-Overlay"
+  },
+  "license": "UNL",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.simplyrin.kzigloader.Main"
+    ]
+  },
+  "mixins": [
+    "therinoverlay.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "fabric": "*",
+    "java": ">=16"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
