@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import lombok.Getter;
 import net.fabricmc.api.ModInitializer;
 import net.md_5.bungee.config.Configuration;
@@ -15,19 +16,30 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.DiffuseLighting;
+import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.StatusEffectSpriteManager;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.MutableText;
+import net.minecraft.util.crash.CrashException;
+import net.minecraft.util.crash.CrashReport;
+import net.minecraft.util.crash.CrashReportSection;
+import net.minecraft.world.World;
 import net.simplyrin.kzigloader.listener.ClientCommandHandler;
 import net.simplyrin.kzigloader.utils.*;
 import net.simplyrin.kzigloader.utils.Tps;
 import net.simplyrin.kzigloader.utils.Tps.MemoryItem;
 import net.simplyrin.kzigloader.utils.Tps.TpsItem;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 /**
  * Created by SimplyRin on 2019/11/17.
@@ -357,7 +369,13 @@ public class Main implements ModInitializer {
 			int a = mc.textRenderer.getWidth(name);
 			int b = mc.textRenderer.getWidth(percent);
 
-			this.drawString(name + "&7> " + color + percent, width - (a + 14 + b), i, 16755200);
+			int c = mc.textRenderer.getWidth(" ");
+
+
+			// matrix.drawItem(itemStack, width - b - (c * 9), i - 5, 3, 1);
+			this.drawItemW(mc.player, mc.world, itemStack, width - b - (c * 7) - (c / 4), i - 4, 3, 1);
+			// matrix.drawItem(itemStack, width - b - (c * 7), i - 5, 0, 0, 0, 0);
+			this.drawString(name + "    &7> " + color + percent, width - (a + 14 + b + (c * 4)), i, 16755200);
 
 			i += 10;
 		}
@@ -418,7 +436,46 @@ public class Main implements ModInitializer {
 			i += 10;
 		}
 	}
+	private void drawItemW(@Nullable LivingEntity entity, @Nullable World world, ItemStack stack, int x, int y, int seed, int z) {
+		if (stack.isEmpty()) {
+			return;
+		}
 
+		var mc = MinecraftClient.getInstance();
+
+		BakedModel bakedModel = mc.getItemRenderer().getModel(stack, world, entity, seed);
+		this.matrixStack.push();
+		this.matrixStack.translate(x + 8, y + 8, 150 + (bakedModel.hasDepth() ? z : 0));
+		try {
+			boolean bl;
+			this.matrixStack.multiplyPositionMatrix(new Matrix4f().scaling(1.0f, -1.0f, 1.0f));
+			this.matrixStack.scale(12.0f, 12.0f, 12.0f);
+			boolean bl2 = bl = !bakedModel.isSideLit();
+			if (bl) {
+				DiffuseLighting.disableGuiDepthLighting();
+			}
+			mc.getItemRenderer().renderItem(stack, ModelTransformationMode.GUI, false, this.matrixStack, this.drawContext.getVertexConsumers(), 0xF000F0, OverlayTexture.DEFAULT_UV, bakedModel);
+
+			// this.draw();
+			RenderSystem.disableDepthTest();
+			this.drawContext.getVertexConsumers().draw();
+			RenderSystem.enableDepthTest();
+
+			if (bl) {
+				DiffuseLighting.enableGuiDepthLighting();
+			}
+		}
+		catch (Throwable throwable) {
+			CrashReport crashReport = CrashReport.create(throwable, "Rendering item");
+			CrashReportSection crashReportSection = crashReport.addElement("Item being rendered");
+			crashReportSection.add("Item Type", () -> String.valueOf(stack.getItem()));
+			crashReportSection.add("Item Damage", () -> String.valueOf(stack.getDamage()));
+			crashReportSection.add("Item NBT", () -> String.valueOf(stack.getNbt()));
+			crashReportSection.add("Item Foil", () -> String.valueOf(stack.hasGlint()));
+			throw new CrashException(crashReport);
+		}
+		this.matrixStack.pop();
+	}
 	public void drawString(String text, int x, int y) {
 		this.drawString(text, x, y, 0);
 	}
