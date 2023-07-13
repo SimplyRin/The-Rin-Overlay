@@ -80,7 +80,7 @@ public class Main implements ModInitializer {
 	private static Main instance;
 
 	@Getter
-	private static final String version = "1.0-SNAPSHOT";
+	private static final String version = "1.0";
 
 	private String prefix = "&7[&cTheRinOverlay&7] &r";
 
