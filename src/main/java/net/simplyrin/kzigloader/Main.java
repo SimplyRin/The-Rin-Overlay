@@ -490,6 +490,7 @@ public class Main implements ModInitializer {
 		}
 		this.matrixStack.pop();
 	}
+
 	public void drawString(String text, int x, int y) {
 		this.drawString(text, x, y, 0);
 	}
@@ -511,42 +512,32 @@ public class Main implements ModInitializer {
 	}
 
 	public boolean toggleItemBreak() {
-		this.toggleItemBreak = !this.toggleItemBreak;
-
-		this.data.set("toggle-ib", this.toggleItemBreak);
+		this.data.set("toggle-ib", this.toggleItemBreak = !this.toggleItemBreak);
 		this.saveDataConfig();
 
 		return this.toggleItemBreak;
 	}
 
 	public boolean toggleShowIpAddress() {
-		this.showIpAddress = !this.showIpAddress;
-
-		this.data.set("toggle-ip", this.showIpAddress);
+		this.data.set("toggle-ip", this.showIpAddress = !this.showIpAddress);
 		this.saveDataConfig();
 
 		return this.showIpAddress;
 	}
 
 	public boolean togglePlayerEntity() {
-		this.playerEntity = !this.playerEntity;
-
-		this.data.set("toggle-playerentity", this.playerEntity);
+		this.data.set("toggle-playerentity", this.playerEntity = !this.playerEntity);
 		this.saveDataConfig();
 
 		return this.playerEntity;
 	}
 
 	public boolean debug() {
-		this.debug = !this.debug;
-
-		return this.debug;
+		return this.debug = !this.debug;
 	}
 
 	public boolean toggleShowTPS() {
-		this.servertps = !this.servertps;
-
-		this.data.set("server-tps", this.servertps);
+		this.data.set("server-tps", this.servertps = !this.servertps);
 		this.saveDataConfig();
 
 		return this.servertps;
