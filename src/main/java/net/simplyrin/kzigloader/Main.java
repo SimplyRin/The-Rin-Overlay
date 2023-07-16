@@ -180,7 +180,22 @@ public class Main implements ModInitializer {
 		MinecraftClient mc = MinecraftClient.getInstance();
 
 		try {
-			InventoryScreen.drawEntity(this.drawContext, 200, 100, 30,-15, -15, mc.player);
+			var entity = mc.getCameraEntity();
+
+			var x = MathHelper.wrapDegrees(entity.getYaw());
+			var y = MathHelper.wrapDegrees(entity.getPitch());
+
+			if (x >= 0) {
+				x = x - x - x;
+			}
+
+			if (y >= 0) {
+				y -= y + y;
+			} else {
+				y += Math.abs(y) + Math.abs(y);
+			}
+
+			InventoryScreen.drawEntity(this.drawContext, 150, 80, 30, x, y, mc.player);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
