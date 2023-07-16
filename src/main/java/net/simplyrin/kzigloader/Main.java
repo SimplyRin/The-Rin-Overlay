@@ -478,8 +478,7 @@ public class Main implements ModInitializer {
 			if (bl) {
 				DiffuseLighting.enableGuiDepthLighting();
 			}
-		}
-		catch (Throwable throwable) {
+		} catch (Throwable throwable) {
 			CrashReport crashReport = CrashReport.create(throwable, "Rendering item");
 			CrashReportSection crashReportSection = crashReport.addElement("Item being rendered");
 			crashReportSection.add("Item Type", () -> String.valueOf(stack.getItem()));
