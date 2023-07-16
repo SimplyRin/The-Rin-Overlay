@@ -574,13 +574,6 @@ public class Main implements ModInitializer {
 		player.sendMessage(text, false);
 	}
 
-	/* public void info(String message) {
-		var textComponent = this.getMutableText(ChatColor.translateAlternateColorCodes(this.prefix));
-		textComponent.append(message);
-		ClientPlayerEntity player = MinecraftClient.getInstance().player;
-		player.sendMessage(textComponent, false);
-	} */
-
 	public MutableText getMutableText(String message) {
 		return MutableText.of(new LiteralTextContent(message));
 	}
