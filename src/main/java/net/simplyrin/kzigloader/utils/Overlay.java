@@ -66,11 +66,12 @@ public class Overlay {
 			case Z:
 				return String.valueOf(String.format("%.1f", mc.getCameraEntity().getPos().getZ()));
 			case IP:
-				if (!this.instance.isShowIpAddress()) {
-					return "";
-				}
 				if (mc.getCurrentServerEntry() != null) {
-					return mc.getCurrentServerEntry().address.trim().replaceAll("[.]_v1_([1-9]|[0-9][0-9]|[0-9][0-9]_[0-9])[.]viafabric", "").trim();
+					if (!this.instance.isShowIpAddress()) {
+						return "Multiplayer";
+					} else {
+						return mc.getCurrentServerEntry().address.trim().replaceAll("[.]_v1_([1-9]|[0-9][0-9]|[0-9][0-9]_[0-9])[.]viafabric", "").trim();
+					}
 				} else {
 					return "Singleplayer";
 				}
