@@ -13,7 +13,7 @@ public abstract class CustomClientPlayerEntiry {
     @Inject(method = "sendChatCommand", at = @At("HEAD"), cancellable = true)
     public void sendChatMessagePacket(String command, CallbackInfo info) {
         if (command != null) {
-            Main.getInstance().getClientCommandHandler().onChat(command, info);
+            // Main.getInstance().getClientCommandHandler().onChat(command, info);
         }
     }
 
