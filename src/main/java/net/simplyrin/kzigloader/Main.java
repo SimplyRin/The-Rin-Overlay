@@ -32,6 +32,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.util.crash.CrashException;
 import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.crash.CrashReportSection;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.simplyrin.kzigloader.listener.ClientCommandHandler;
 import net.simplyrin.kzigloader.utils.*;
@@ -365,17 +366,15 @@ public class Main implements ModInitializer {
 				color = "&e";
 			}
 
-
 			int a = mc.textRenderer.getWidth(name);
 			int b = mc.textRenderer.getWidth(percent);
+			int bMax = mc.textRenderer.getWidth("100.0%");
 
 			int c = mc.textRenderer.getWidth(" ");
 
-
 			// matrix.drawItem(itemStack, width - b - (c * 9), i - 5, 3, 1);
-			this.drawItemW(mc.player, mc.world, itemStack, width - b - (c * 7) - (c / 4), i - 4, 3, 1);
-			// matrix.drawItem(itemStack, width - b - (c * 7), i - 5, 0, 0, 0, 0);
-			this.drawString(name + "    &7> " + color + percent, width - (a + 14 + b + (c * 4)), i, 16755200);
+			this.drawItemW(mc.player, mc.world, itemStack, width - bMax - (c * 7) - (c / 2), i - 4, 3, 1);
+			this.drawString(name + "    &7> " + color + percent, width - (a + 14 + bMax + (c * 4)), i, 16755200);
 
 			i += 10;
 		}
