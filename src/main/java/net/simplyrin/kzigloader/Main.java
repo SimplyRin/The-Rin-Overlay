@@ -27,8 +27,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.crash.CrashException;
 import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.crash.CrashReportSection;
@@ -195,7 +195,7 @@ public class Main implements ModInitializer {
 				y += Math.abs(y) + Math.abs(y);
 			}
 
-			InventoryScreen.drawEntity(this.drawContext, 150, 80, 30, x, y, mc.player);
+			InventoryScreen.drawEntity(this.drawContext, 150, 80, 0, 0, 30, 0, x, y, mc.player);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -215,7 +215,7 @@ public class Main implements ModInitializer {
 
 		MinecraftClient mc = MinecraftClient.getInstance();
 
-		if (mc.options.debugEnabled) {
+		if (mc.getDebugHud().shouldShowDebugHud()) {
 			return;
 		}
 
@@ -573,8 +573,8 @@ public class Main implements ModInitializer {
 		player.sendMessage(text, false);
 	}
 
-	public MutableText getMutableText(String message) {
-		return MutableText.of(new LiteralTextContent(message));
+	public Text getMutableText(String message) {
+		return Text.of(message);
 	}
 
 }

@@ -6,14 +6,9 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Style;
 import net.simplyrin.kzigloader.Main;
 import net.simplyrin.kzigloader.utils.ChatColor;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -122,11 +117,11 @@ public class ClientCommandHandler {
 								items.add(new OslItem("jOOR", "Apache License 2.0", "https://github.com/jOOQ/jOOR/blob/master/README.md"));
 
 								for (OslItem item : items) {
-									var textComponent = this.instance.getMutableText(ChatColor.translateAlternateColorCodes("&b" + item.name + " &7(" + item.license + ")"));
-									Style style = textComponent.getStyle();
-									style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, item.url));
-									textComponent.setStyle(style);
-									this.instance.info(textComponent);
+									var textComponent = this.instance.getMutableText(ChatColor.translateAlternateColorCodes("&b" + item.name + " &7(" + item.license + ") " + item.url));
+									// Style style = textComponent.getStyle();
+									// style.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, item.url));
+									// textComponent.setStyle(style);
+									this.instance.info(textComponent.getString());
 								}
 								return 1;
 							})

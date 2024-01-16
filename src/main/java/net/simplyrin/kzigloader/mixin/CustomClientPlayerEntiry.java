@@ -1,7 +1,6 @@
 package net.simplyrin.kzigloader.mixin;
 
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.simplyrin.kzigloader.Main;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
