@@ -10,8 +10,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.simplyrin.kzigloader.Main;
 
 public class Overlay {
@@ -165,12 +165,9 @@ public class Overlay {
 	}
 
 	public String convertDuration(StatusEffectInstance effect) {
-		return getPotionDurationString(effect, 1.0F).replace(".", ":");
-	}
+		MinecraftClient mc = MinecraftClient.getInstance();
 
-	public static String getPotionDurationString(StatusEffectInstance effect, float durationFactor) {
-		int i = MathHelper.floor((float) effect.getDuration() * durationFactor);
-		return ticksToElapsedTime(i);
+		return StatusEffectUtil.getDurationText(effect, 1.0F, mc.world.getTickManager().getTickRate()).getString();
 	}
 
 	public static String ticksToElapsedTime(int ticks) {
